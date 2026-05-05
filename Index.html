@@ -277,7 +277,7 @@
             </div>
         </section>
         
-        <!-- SKILLS (Progress Bars Removed + Enhanced 3D Styling) -->
+        <!-- SKILLS -->
         <section id="skills" class="max-w-7xl mx-auto px-8 py-20 border-t border-[#d4af37]/10 fade-up">
             <div class="section-divider my-8"></div>
             
@@ -299,7 +299,6 @@
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
-                        <!-- HTML5 -->
                         <div class="skill-card bg-[#111111] p-6 rounded-3xl border border-[#d4af37]/10 flex flex-col items-center text-center group">
                             <div class="skill-icon w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 mb-5">
                                 <img src="images/html.png" alt="HTML5" class="w-12 h-12">
@@ -307,7 +306,6 @@
                             <span class="font-semibold text-lg">HTML5</span>
                         </div>
                         
-                        <!-- CSS3 -->
                         <div class="skill-card bg-[#111111] p-6 rounded-3xl border border-[#d4af37]/10 flex flex-col items-center text-center group">
                             <div class="skill-icon w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 mb-5">
                                 <img src="images/css.png" alt="CSS3" class="w-12 h-12">
@@ -315,7 +313,6 @@
                             <span class="font-semibold text-lg">CSS3</span>
                         </div>
                         
-                        <!-- JavaScript -->
                         <div class="skill-card bg-[#111111] p-6 rounded-3xl border border-[#d4af37]/10 flex flex-col items-center text-center group">
                             <div class="skill-icon w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-yellow-400 to-yellow-500 mb-5">
                                 <img src="https://cdn-icons-png.flaticon.com/512/5968/5968292.png" alt="JavaScript" class="w-12 h-12">
@@ -323,7 +320,6 @@
                             <span class="font-semibold text-lg">JavaScript</span>
                         </div>
                         
-                        <!-- jQuery -->
                         <div class="skill-card bg-[#111111] p-6 rounded-3xl border border-[#d4af37]/10 flex flex-col items-center text-center group">
                             <div class="skill-icon w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-blue-500 mb-5">
                                 <img src="https://cdn-icons-png.flaticon.com/512/5968/5968332.png" alt="jQuery" class="w-12 h-12">
@@ -797,31 +793,37 @@
         // ==================== GROQ API CONFIGURATION ====================
         const GROQ_API_KEY = ""; 
         
-        const SYSTEM_PROMPT = `You are Ralph Aian Escote's personal AI assistant. 
-Your name is "Ralph's Assistant". 
+        const SYSTEM_PROMPT = `You are Ralph Aian Escote's personal AI assistant named "Ralph's Assistant".
 
+STRICT RULES:
+- You ONLY talk about Ralph Aian Escote.
+- You NEVER answer questions about other people, general knowledge, coding help, politics, or anything unrelated to Ralph.
+- If the user asks something unrelated, politely say: "I'm sorry, I can only talk about Ralph Aian Escote. Would you like to know something about him instead?"
+- Always keep responses short, clear, and focused only on Ralph.
+
+About Ralph:
 - Full Name: Ralph Aian Escote
-- Location: Noveleta, Cavite, Philippines
-- Current Status: Aspiring Web Developer
-- Education: Bachelor of Science in Information Technology from Cavite State University (2021–2025)
+- From: Noveleta, Cavite, Philippines
+- Status: Aspiring Web Developer
+- Education: BS Information Technology at Cavite State University (2021–2025)
 - Skills: PHP, Laravel, MySQL, JavaScript, HTML, CSS, Python, Git, VS Code, XAMPP
-- Projects: 
+- Projects:
   • Little Steps (Child Growth Tracking System) - Team Leader
   • Visitor's Log Walk-in System (for Casa Hacienda de Tejeros)
-  • De Chavez Waterhaus (Full Water Delivery Management Platform - Real Client Project)
+  • De Chavez Waterhaus (Water Delivery Management Platform - Real Client Project)
 - Work Experience:
   • Robot Operator at Astro Robotics (Aug 2025 – Apr 2026)
   • IT Intern at Casa Hacienda de Tejeros (Feb 2025 – May 2025)
 - Goals: Become a full-stack web developer and build meaningful digital products
 - Personality: Detail-oriented, passionate about learning, and enjoys solving real problems through code
 
-IMPORTANT FORMATTING RULES:
-- Always use short paragraphs (2-4 sentences max)
+IMPORTANT FORMATTING:
+- Use short paragraphs (2-4 sentences max)
 - Use bullet points when listing things
-- Add line breaks between different ideas
-- Keep responses clear, clean, and easy to read
+- Always add line breaks between ideas`;
 
-You ONLY answer questions about Ralph Aian Escote. If asked something unrelated, politely redirect.`;
+        let lastMessage = "";
+        let spamCount = 0;
 
         function initializeTailwind() {
             tailwind.config = { theme: { extend: {} } };
@@ -911,7 +913,6 @@ You ONLY answer questions about Ralph Aian Escote. If asked something unrelated,
         }
         
         function initProgressBars() {
-            // Progress bars removed as requested
             console.log('%c[Skills] Progress bars removed for cleaner design', 'color:#d4af37');
         }
         
@@ -979,51 +980,79 @@ You ONLY answer questions about Ralph Aian Escote. If asked something unrelated,
             sendToGroqAPI(question);
         }
         
+        // ==================== ANTI-SPAM + STRICT AI ====================
+        function getRandomSpamJoke() {
+            const jokes = [
+                "Why did the spammer go to therapy? Because he kept repeating himself!",
+                "What do you call a spamming robot? A 're-peater'!",
+                "Why don't spammers ever get lost? Because they always take the same route!",
+                "How do spammers stay in shape? They do 'repeat' exercises!",
+                "Why did the message get kicked out of the chat? It was too repetitive!"
+            ];
+            return jokes[Math.floor(Math.random() * jokes.length)];
+        }
+        
         async function sendToGroqAPI(userMessage) {
-          const messagesContainer = document.getElementById('chat-messages');
-          
-          // Show typing indicator
-          const typingDiv = document.createElement('div');
-          typingDiv.id = 'typing-indicator';
-          typingDiv.className = 'chat-message flex gap-x-3';
-          typingDiv.innerHTML = `
-            <div class="w-8 h-8 rounded-full bg-[#d4af37] flex-shrink-0 flex items-center justify-center">
-              <i class="fas fa-robot text-[#0f0f0f] text-sm"></i>
-            </div>
-            <div class="typing-indicator">
-              <div class="typing-dot"></div>
-              <div class="typing-dot"></div>
-              <div class="typing-dot"></div>
-            </div>
-          `;
-          messagesContainer.appendChild(typingDiv);
-          messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-          try {
-            const response = await fetch("/.netlify/functions/chat", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ message: userMessage })
-            });
-
-            const data = await response.json();
-            const typing = document.getElementById('typing-indicator');
-            if (typing) typing.remove();
-
-            if (data.choices && data.choices[0]) {
-              addBotMessage(data.choices[0].message.content);
-            } else {
-              addBotMessage("Sorry, I'm having trouble right now.");
-            }
+            const messagesContainer = document.getElementById('chat-messages');
             
-            showQuickReplies();
+            // Anti-spam check
+            if (userMessage.toLowerCase() === lastMessage.toLowerCase()) {
+                spamCount++;
+                if (spamCount >= 2) {
+                    const typing = document.getElementById('typing-indicator');
+                    if (typing) typing.remove();
+                    
+                    addBotMessage(`Please don't spam the same message. ${getRandomSpamJoke()}`);
+                    showQuickReplies();
+                    return;
+                }
+            } else {
+                spamCount = 0;
+            }
+            lastMessage = userMessage;
 
-          } catch (error) {
-            const typing = document.getElementById('typing-indicator');
-            if (typing) typing.remove();
-            addBotMessage("Sorry, I'm having trouble connecting right now.");
-            showQuickReplies();
-          }
+            // Show typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'chat-message flex gap-x-3';
+            typingDiv.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-[#d4af37] flex-shrink-0 flex items-center justify-center">
+                    <i class="fas fa-robot text-[#0f0f0f] text-sm"></i>
+                </div>
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            try {
+                const response = await fetch("/.netlify/functions/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: userMessage })
+                });
+
+                const data = await response.json();
+                const typing = document.getElementById('typing-indicator');
+                if (typing) typing.remove();
+
+                if (data.choices && data.choices[0]) {
+                    addBotMessage(data.choices[0].message.content);
+                } else {
+                    addBotMessage("Sorry, I'm having trouble right now.");
+                }
+                
+                showQuickReplies();
+
+            } catch (error) {
+                const typing = document.getElementById('typing-indicator');
+                if (typing) typing.remove();
+                addBotMessage("Sorry, I'm having trouble connecting right now.");
+                showQuickReplies();
+            }
         }
         
         function sendMessage() {
@@ -1038,10 +1067,10 @@ You ONLY answer questions about Ralph Aian Escote. If asked something unrelated,
         }
         
         function initChatbot() {
-            console.log('%c[Chatbot] Groq AI ready (key will be added on Netlify)', 'color:#d4af37');
+            console.log('%c[Chatbot] Strict mode + Anti-spam enabled', 'color:#d4af37');
         }
         
-        const projects = [
+        const projects = [ /* same as before */ 
             {
                 id: 0,
                 title: "Little Steps",
@@ -1205,7 +1234,7 @@ You ONLY answer questions about Ralph Aian Escote. If asked something unrelated,
                 }
             });
             
-            console.log('%c[Portfolio] Progress bars removed + 3D skill cards enhanced!', 'color:#d4af37');
+            console.log('%c[Portfolio] Strict AI + Anti-spam enabled!', 'color:#d4af37');
         }
         
         window.onload = initializePortfolio;
